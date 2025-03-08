@@ -17,11 +17,12 @@ import { useRouter } from "expo-router";
 import { getUser } from "@/utils/userStore";
 import { useAuth } from "@clerk/clerk-expo";
 import { clearUser } from "@/utils/userStore";
+import axios from "axios";
 
 // Language options
 const LANGUAGES = [
   { code: "en", name: "English", flag: "🇺🇸" },
-  { code: "🇮🇳", name: "Hindi", flag: "🇮🇳" },
+  // { code: "🇮🇳", name: "Hindi", flag: "🇮🇳" },
 ];
 
 export default function ProfileScreen() {
@@ -131,7 +132,7 @@ export default function ProfileScreen() {
 
         {/* Settings Sections */}
         <View style={styles.settingsSection}>
-          <Text style={styles.sectionTitle}>Language Preferences</Text>
+          <Text style={styles.sectionTitle}>Language</Text>
 
           <View style={styles.languageOptionsContainer}>
             {LANGUAGES.map((lang) => (
@@ -187,43 +188,11 @@ export default function ProfileScreen() {
               value={notificationsEnabled}
             />
           </View>
-
-          <View style={styles.settingRow}>
-            <View style={styles.settingInfo}>
-              <Ionicons
-                name="moon-outline"
-                size={22}
-                color="#4A5568"
-                style={styles.settingIcon}
-              />
-              <Text style={styles.settingLabel}>Dark Mode</Text>
-            </View>
-            <Switch
-              trackColor={{ false: "#E2E8F0", true: "#CBD5E0" }}
-              thumbColor={darkModeEnabled ? "#4C51BF" : "#A0AEC0"}
-              ios_backgroundColor="#E2E8F0"
-              onValueChange={() => setDarkModeEnabled((prev) => !prev)}
-              value={darkModeEnabled}
-            />
-          </View>
         </View>
 
         {/* Account Actions */}
         <View style={styles.settingsSection}>
           <Text style={styles.sectionTitle}>Account</Text>
-
-          <TouchableOpacity style={styles.actionButton}>
-            <View style={styles.actionButtonContent}>
-              <Feather
-                name="shield"
-                size={20}
-                color="#4A5568"
-                style={styles.actionIcon}
-              />
-              <Text style={styles.actionText}>Privacy & Security</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color="#A0AEC0" />
-          </TouchableOpacity>
 
           <TouchableOpacity style={styles.actionButton}>
             <View style={styles.actionButtonContent}>

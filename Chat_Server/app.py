@@ -45,6 +45,8 @@ app = FastAPI()
 class TextRequest(BaseModel):
     text: str
 
+# // hello
+
 # Dictionary mapping categories to service URLs
 SERVICE_URLS = {
     "Exercise": "http://localhost:8001/exercise",

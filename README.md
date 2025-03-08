@@ -7,8 +7,7 @@ Instead of relying on large, resource-intensive LLMs, it uses multiple small, fi
 - Exercise & Fitness  
 - Mental Well-being  
 - Diet & Nutrition  
-- Sleep Hygiene  
-- Social Connectivity  
+- Sleep Hygiene   
 
 The chatbot efficiently routes queries to the appropriate LLM using a classifier, making responses faster, accurate, and more affordable.  
 

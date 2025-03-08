@@ -13,8 +13,11 @@ import {
   Image,
   Platform,
   ActivityIndicator,
+  StatusBar,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import axios from "axios";
 
 export const useWarmUpBrowser = () => {
   useEffect(() => {
@@ -37,13 +40,20 @@ export default function LoginScreen() {
   const handleGoogleSignIn = useCallback(async () => {
     try {
       setIsLoading(true);
-      const { createdSessionId, setActive } = await startSSOFlow({
+      const { createdSessionId, setActive, signIn } = await startSSOFlow({
         strategy: "oauth_google",
         redirectUrl: AuthSession.makeRedirectUri(),
       });
 
       if (createdSessionId) {
         await setActive!({ session: createdSessionId });
+
+        // const response = await axios.post(
+        //   `${process.env.API_URL}/users/googleAuth`,
+        //   { createdSessionId }
+        // );
+
+        // console.log("response is: ", response);
         // Redirect to index after successful login
         router.replace("/");
       }
@@ -56,64 +66,52 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ImageBackground
-        source={{
-          uri: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=1470&auto=format&fit=crop",
-        }}
-        style={styles.backgroundImage}
-        blurRadius={3}
-      >
-        <View style={styles.overlay} />
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
-        <View style={styles.content}>
-          <View style={styles.logoContainer}>
-            {/* <Image
-              source={require("../assets/images/icon.png")}
-              style={styles.logo}
-              resizeMode="contain"
-            /> */}
-            <Text style={styles.appName}>Lifestyle</Text>
-            <Text style={styles.tagline}>Your smart data platform</Text>
-          </View>
-
-          <View style={styles.loginCard}>
-            <Text style={styles.welcomeText}>Welcome</Text>
-            <Text style={styles.instructionText}>
-              Sign in to continue to your dashboard
-            </Text>
-
-            <TouchableOpacity
-              style={styles.googleButton}
-              onPress={handleGoogleSignIn}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <ActivityIndicator color="#fff" size="small" />
-              ) : (
-                <>
-                  <Image
-                    source={{
-                      uri: "https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg",
-                    }}
-                    style={styles.googleIcon}
-                  />
-                  <Text style={styles.googleButtonText}>
-                    Sign in with Google
-                  </Text>
-                </>
-              )}
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>
-              By signing in, you agree to our{" "}
-              <Text style={styles.footerLink}>Terms of Service</Text> and{" "}
-              <Text style={styles.footerLink}>Privacy Policy</Text>
-            </Text>
-          </View>
+      <View style={styles.contentContainer}>
+        {/* App Logo/Icon */}
+        <View style={styles.logoContainer}>
+          <LinearGradient
+            colors={["#5A67D8", "#3182CE"]}
+            style={styles.logoBackground}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Text style={styles.logoText}>L</Text>
+          </LinearGradient>
         </View>
-      </ImageBackground>
+
+        <Text style={styles.title}>Welcome to Lifestyle</Text>
+        <Text style={styles.subtitle}>Sign in to continue your journey</Text>
+
+        {/* Google Sign-In */}
+        <TouchableOpacity
+          style={styles.googleButton}
+          onPress={handleGoogleSignIn}
+          // disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="#fff" size="small" />
+          ) : (
+            <>
+              <Image
+                source={{
+                  uri: "https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg",
+                }}
+                style={styles.googleIcon}
+              />
+              <Text style={styles.googleText}>Continue with Google</Text>
+            </>
+          )}
+        </TouchableOpacity>
+
+        {/* Terms and Privacy */}
+        <Text style={styles.termsText}>
+          By continuing, you agree to our{" "}
+          <Text style={styles.textLink}>Terms of Service</Text> and{" "}
+          <Text style={styles.textLink}>Privacy Policy</Text>
+        </Text>
+      </View>
     </SafeAreaView>
   );
 }
@@ -121,99 +119,158 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#FFFFFF",
   },
-  backgroundImage: {
+  keyboardAvoid: {
+    flex: 1,
+  },
+  contentContainer: {
     flex: 1,
     justifyContent: "center",
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.65)",
-  },
-  content: {
-    flex: 1,
-    justifyContent: "space-between",
-    padding: 20,
-    paddingTop: Platform.OS === "android" ? 50 : 0,
+    alignItems: "center",
+    paddingHorizontal: 24,
+    paddingBottom: 40,
   },
   logoContainer: {
-    alignItems: "center",
-    marginTop: 60,
-    marginBottom: 40,
+    marginBottom: 24,
   },
-  logo: {
+  logoBackground: {
     width: 80,
     height: 80,
-    marginBottom: 16,
-  },
-  appName: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#FFFFFF",
-    marginBottom: 10,
-  },
-  tagline: {
-    fontSize: 16,
-    color: "rgba(255, 255, 255, 0.8)",
-  },
-  loginCard: {
-    backgroundColor: "#FFFFFF",
     borderRadius: 20,
-    padding: 24,
-    marginHorizontal: 15,
-    alignSelf: "stretch",
-    shadowColor: "#000",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#4C51BF",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
-  welcomeText: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#333",
+  logoText: {
+    fontSize: 44,
+    fontWeight: "bold",
+    color: "white",
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#2D3748",
     marginBottom: 8,
     textAlign: "center",
   },
-  instructionText: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 30,
+  subtitle: {
+    fontSize: 16,
+    color: "#718096",
+    marginBottom: 32,
     textAlign: "center",
   },
-  googleButton: {
+  inputContainer: {
+    flexDirection: "row",
+    width: "100%",
+    height: 56,
+    borderColor: "#E2E8F0",
+    borderWidth: 1.5,
+    borderRadius: 12,
+    marginBottom: 20,
+    backgroundColor: "#F7FAFC",
+    overflow: "hidden",
+  },
+  countryCode: {
+    width: 50,
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRightWidth: 1,
+    borderRightColor: "#E2E8F0",
+  },
+  countryCodeText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#4A5568",
+  },
+  input: {
+    flex: 1,
+    height: "100%",
+    paddingHorizontal: 16,
+    fontSize: 16,
+    color: "#2D3748",
+  },
+  buttonContainer: {
+    width: "100%",
+    height: 56,
+    borderRadius: 12,
+    overflow: "hidden",
+    marginBottom: 24,
+    shadowColor: "#4C51BF",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  phoneButton: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  phoneText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  dividerContainer: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#6C63FF",
+    width: "100%",
+    marginBottom: 24,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#E2E8F0",
+  },
+  dividerText: {
+    paddingHorizontal: 16,
+    fontSize: 14,
+    color: "#718096",
+    fontWeight: "500",
+  },
+  googleButton: {
+    width: "100%",
+    height: 56,
+    flexDirection: "row",
+    backgroundColor: "#FFFFFF",
     borderRadius: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    marginBottom: 16,
+    borderWidth: 1.5,
+    borderColor: "#E2E8F0",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   googleIcon: {
-    width: 20,
-    height: 20,
+    width: 24,
+    height: 24,
     marginRight: 12,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 10,
   },
-  googleButtonText: {
+  googleText: {
     fontSize: 16,
-    color: "#FFFFFF",
     fontWeight: "600",
+    color: "#2D3748",
   },
-  footer: {
-    marginTop: 40,
-    marginBottom: 20,
-  },
-  footerText: {
+  termsText: {
     fontSize: 12,
-    color: "rgba(255, 255, 255, 0.7)",
+    color: "#718096",
     textAlign: "center",
+    paddingHorizontal: 24,
+    lineHeight: 18,
   },
-  footerLink: {
-    color: "#FFFFFF",
+  textLink: {
+    color: "#4C51BF",
     fontWeight: "500",
   },
 });

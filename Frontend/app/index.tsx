@@ -11,11 +11,25 @@ import {
 } from "react-native";
 import { useAuth } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
+import { useUser } from "@clerk/clerk-expo";
+import { setUser } from "@/utils/userStore";
+import { clearUser } from "@/utils/userStore";
 
 export default function HomeScreen() {
   const { isSignedIn, signOut } = useAuth();
   const router = useRouter();
   const [isSigningOut, setIsSigningOut] = useState(false);
+
+  const { user } = useUser();
+
+  const userInfo = {
+    firstName: user?.firstName,
+    lastName: user?.lastName,
+    email: user?.primaryEmailAddress?.emailAddress,
+    image: user?.imageUrl,
+  };
+
+  setUser(userInfo);
 
   // Debug logging to verify component mounting
   useEffect(() => {
@@ -67,6 +81,8 @@ export default function HomeScreen() {
         "There was a problem signing out. Please try again."
       );
       setIsSigningOut(false);
+    } finally {
+      clearUser();
     }
   };
 

@@ -14,24 +14,25 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons, MaterialIcons, Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { getUser } from "@/utils/userStore";
+import { useAuth } from "@clerk/clerk-expo";
+import { clearUser } from "@/utils/userStore";
 
 // Language options
 const LANGUAGES = [
   { code: "en", name: "English", flag: "🇺🇸" },
-  { code: "hi", name: "Hindi", flag: "hi" },
+  { code: "🇮🇳", name: "Hindi", flag: "🇮🇳" },
 ];
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const { isSignedIn, signOut } = useAuth();
   const [activeLanguage, setActiveLanguage] = useState("en");
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [darkModeEnabled, setDarkModeEnabled] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
-  const user = {
-    name: "Alex Johnson",
-    email: "alex.johnson@example.com",
-    photoUrl: "https://i.pravatar.cc/300",
-  };
+  const user = getUser();
 
   const handleLogout = () => {
     Alert.alert("Logout", "Are you sure you want to logout?", [
@@ -42,8 +43,37 @@ export default function ProfileScreen() {
       {
         text: "Logout",
         onPress: () => {
-          // In a real app, you would clear the user's session here
-          router.replace("/");
+          try {
+            console.log("inside the handlesignout");
+            setIsSigningOut(true);
+
+            setTimeout(async () => {
+              try {
+                console.log("Attempting to sign out...");
+                await signOut();
+                console.log("Sign out successful");
+
+                console.log("Navigating to login screen");
+                router.replace("/login");
+              } catch (error) {
+                console.error("Error in delayed signOut:", error);
+                Alert.alert(
+                  "Sign Out Error",
+                  "There was a problem signing out. Please try again."
+                );
+                setIsSigningOut(false);
+              }
+            }, 500);
+          } catch (error) {
+            console.error("Error in handleSignOut:", error);
+            Alert.alert(
+              "Sign Out Error",
+              "There was a problem signing out. Please try again."
+            );
+            setIsSigningOut(false);
+          } finally {
+            clearUser();
+          }
         },
         style: "destructive",
       },
@@ -86,13 +116,17 @@ export default function ProfileScreen() {
         <View style={styles.profileSection}>
           <View style={styles.photoContainer}>
             <Image
-              source={{ uri: user.photoUrl }}
+              source={{
+                uri: user?.imageUrl
+                  ? user.imageUrl
+                  : "https://i.pravatar.cc/300",
+              }}
               style={styles.profilePhoto}
             />
           </View>
 
-          <Text style={styles.userName}>{user.name}</Text>
-          <Text style={styles.userEmail}>{user.email}</Text>
+          <Text style={styles.userName}>{user?.firstName}</Text>
+          <Text style={styles.userEmail}>{user?.email}</Text>
         </View>
 
         {/* Settings Sections */}

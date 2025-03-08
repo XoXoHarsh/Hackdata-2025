@@ -1,0 +1,4 @@
+venv
+__pycache__
+fine_tuned_model
+lora_model

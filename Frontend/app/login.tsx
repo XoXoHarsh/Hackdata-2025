@@ -1,132 +1,119 @@
-import React from "react";
-import { Link, Redirect, useRouter } from "expo-router";
+import React, { useCallback, useEffect } from "react";
+import * as WebBrowser from "expo-web-browser";
+import * as AuthSession from "expo-auth-session";
+import { useSSO } from "@clerk/clerk-expo";
+import { useRouter } from "expo-router";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
+  ImageBackground,
   SafeAreaView,
   Image,
+  Platform,
+  ActivityIndicator,
 } from "react-native";
-import { useAuth } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 
-export default function HomeScreen() {
-  const { signOut } = useAuth();
+export const useWarmUpBrowser = () => {
+  useEffect(() => {
+    void WebBrowser.warmUpAsync();
+    return () => {
+      void WebBrowser.coolDownAsync();
+    };
+  }, []);
+};
+
+// Handle any pending authentication sessions
+WebBrowser.maybeCompleteAuthSession();
+
+export default function LoginScreen() {
+  useWarmUpBrowser();
   const router = useRouter();
+  const [isLoading, setIsLoading] = React.useState(false);
+  const { startSSOFlow } = useSSO();
 
-  const handleSignOut = async () => {
+  const handleGoogleSignIn = useCallback(async () => {
     try {
-      await signOut();
-      // Navigation handled automatically by isSignedIn check above
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
-  };
+      setIsLoading(true);
+      const { createdSessionId, setActive } = await startSSOFlow({
+        strategy: "oauth_google",
+        redirectUrl: AuthSession.makeRedirectUri(),
+      });
 
-  const navigateTo = (screen: any) => {
-    router.push(screen);
-  };
+      if (createdSessionId) {
+        await setActive!({ session: createdSessionId });
+        // Redirect to index after successful login
+        router.replace("/");
+      }
+    } catch (err) {
+      console.error(JSON.stringify(err, null, 2));
+    } finally {
+      setIsLoading(false);
+    }
+  }, [startSSOFlow, router]);
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* App Header */}
-      <View style={styles.header}>
-        <Image
-          source={require("../assets/images/icon.png")}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-        <Text style={styles.headerTitle}>LifeStyle</Text>
-        <TouchableOpacity onPress={handleSignOut} style={styles.logoutButton}>
-          <Ionicons name="log-out-outline" size={24} color="#FF5A5F" />
-        </TouchableOpacity>
-      </View>
+      <ImageBackground
+        source={{
+          uri: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=1470&auto=format&fit=crop",
+        }}
+        style={styles.backgroundImage}
+        blurRadius={3}
+      >
+        <View style={styles.overlay} />
 
-      {/* Main Content */}
-      <View style={styles.content}>
-        <View style={styles.card}>
-          <Text style={styles.welcomeText}>Welcome to LifeStyle!</Text>
-          <Text style={styles.subText}>Your personal lifestyle companion</Text>
-
-          <View style={styles.statsContainer}>
-            <View style={styles.statItem}>
-              <Ionicons name="analytics-outline" size={28} color="#6C63FF" />
-              <Text style={styles.statNumber}>12</Text>
-              <Text style={styles.statLabel}>Reports</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Ionicons name="chatbubbles-outline" size={28} color="#6C63FF" />
-              <Text style={styles.statNumber}>5</Text>
-              <Text style={styles.statLabel}>Messages</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Ionicons name="people-outline" size={28} color="#6C63FF" />
-              <Text style={styles.statNumber}>3</Text>
-              <Text style={styles.statLabel}>Teams</Text>
-            </View>
+        <View style={styles.content}>
+          <View style={styles.logoContainer}>
+            <Image
+              source={require("../assets/images/icon.png")}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+            <Text style={styles.appName}>Lifestyle</Text>
+            <Text style={styles.tagline}>Your smart data platform</Text>
           </View>
-        </View>
 
-        <View style={styles.quickLinks}>
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
-          <View style={styles.linksGrid}>
+          <View style={styles.loginCard}>
+            <Text style={styles.welcomeText}>Welcome</Text>
+            <Text style={styles.instructionText}>
+              Sign in to continue to your dashboard
+            </Text>
+
             <TouchableOpacity
-              style={styles.linkCard}
-              onPress={() => navigateTo("/dashboard")}
+              style={styles.googleButton}
+              onPress={handleGoogleSignIn}
+              disabled={isLoading}
             >
-              <Ionicons name="speedometer-outline" size={24} color="#6C63FF" />
-              <Text style={styles.linkText}>Dashboard</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.linkCard}
-              onPress={() => navigateTo("/chat")}
-            >
-              <Ionicons name="chatbox-outline" size={24} color="#6C63FF" />
-              <Text style={styles.linkText}>Chat</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.linkCard}
-              onPress={() => navigateTo("/profile")}
-            >
-              <Ionicons name="person-outline" size={24} color="#6C63FF" />
-              <Text style={styles.linkText}>Profile</Text>
+              {isLoading ? (
+                <ActivityIndicator color="#fff" size="small" />
+              ) : (
+                <>
+                  <Image
+                    source={{
+                      uri: "https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg",
+                    }}
+                    style={styles.googleIcon}
+                  />
+                  <Text style={styles.googleButtonText}>
+                    Sign in with Google
+                  </Text>
+                </>
+              )}
             </TouchableOpacity>
           </View>
+
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>
+              By signing in, you agree to our{" "}
+              <Text style={styles.footerLink}>Terms of Service</Text> and{" "}
+              <Text style={styles.footerLink}>Privacy Policy</Text>
+            </Text>
+          </View>
         </View>
-      </View>
-
-      {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => {}}>
-          <Ionicons name="home" size={24} color="#6C63FF" />
-          <Text style={[styles.navText, styles.activeNavText]}>Home</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => navigateTo("/dashboard")}
-        >
-          <Ionicons name="speedometer-outline" size={24} color="#888" />
-          <Text style={styles.navText}>Dashboard</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => navigateTo("/chat")}
-        >
-          <Ionicons name="chatbox-outline" size={24} color="#888" />
-          <Text style={styles.navText}>Chat</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => navigateTo("/profile")}
-        >
-          <Ionicons name="person-outline" size={24} color="#888" />
-          <Text style={styles.navText}>Profile</Text>
-        </TouchableOpacity>
-      </View>
+      </ImageBackground>
     </SafeAreaView>
   );
 }
@@ -134,129 +121,99 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5F7",
   },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingTop: 50,
-    paddingBottom: 20,
-    backgroundColor: "#FFFFFF",
-    borderBottomWidth: 1,
-    borderBottomColor: "#EEEEEE",
+  backgroundImage: {
+    flex: 1,
+    justifyContent: "center",
   },
-  logo: {
-    width: 40,
-    height: 40,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#333",
-  },
-  logoutButton: {
-    padding: 8,
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.65)",
   },
   content: {
     flex: 1,
+    justifyContent: "space-between",
     padding: 20,
+    paddingTop: Platform.OS === "android" ? 50 : 0,
   },
-  card: {
+  logoContainer: {
+    alignItems: "center",
+    marginTop: 60,
+    marginBottom: 40,
+  },
+  logo: {
+    width: 80,
+    height: 80,
+    marginBottom: 16,
+  },
+  appName: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    marginBottom: 10,
+  },
+  tagline: {
+    fontSize: 16,
+    color: "rgba(255, 255, 255, 0.8)",
+  },
+  loginCard: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 15,
-    padding: 20,
-    marginBottom: 20,
+    borderRadius: 20,
+    padding: 24,
+    marginHorizontal: 15,
+    alignSelf: "stretch",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
     shadowRadius: 10,
-    elevation: 3,
+    elevation: 5,
   },
   welcomeText: {
     fontSize: 22,
     fontWeight: "700",
     color: "#333",
     marginBottom: 8,
+    textAlign: "center",
   },
-  subText: {
+  instructionText: {
     fontSize: 14,
     color: "#666",
-    marginBottom: 24,
+    marginBottom: 30,
+    textAlign: "center",
   },
-  statsContainer: {
+  googleButton: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 10,
-  },
-  statItem: {
     alignItems: "center",
-    flex: 1,
-  },
-  statNumber: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#333",
-    marginVertical: 6,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: "#666",
-  },
-  quickLinks: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 15,
-    padding: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: 15,
-  },
-  linksGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-  },
-  linkCard: {
-    width: "30%",
-    backgroundColor: "#F9F9FF",
+    justifyContent: "center",
+    backgroundColor: "#6C63FF",
     borderRadius: 12,
-    padding: 15,
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  linkText: {
-    marginTop: 8,
-    fontSize: 12,
-    color: "#444",
-  },
-  bottomNav: {
-    flexDirection: "row",
-    backgroundColor: "#FFFFFF",
-    borderTopWidth: 1,
-    borderTopColor: "#EEEEEE",
-    paddingVertical: 12,
+    paddingVertical: 14,
     paddingHorizontal: 20,
-    justifyContent: "space-between",
+    marginBottom: 16,
   },
-  navItem: {
-    alignItems: "center",
+  googleIcon: {
+    width: 20,
+    height: 20,
+    marginRight: 12,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 10,
   },
-  navText: {
-    fontSize: 12,
-    marginTop: 4,
-    color: "#888",
-  },
-  activeNavText: {
-    color: "#6C63FF",
+  googleButtonText: {
+    fontSize: 16,
+    color: "#FFFFFF",
     fontWeight: "600",
+  },
+  footer: {
+    marginTop: 40,
+    marginBottom: 20,
+  },
+  footerText: {
+    fontSize: 12,
+    color: "rgba(255, 255, 255, 0.7)",
+    textAlign: "center",
+  },
+  footerLink: {
+    color: "#FFFFFF",
+    fontWeight: "500",
   },
 });

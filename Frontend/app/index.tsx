@@ -5,9 +5,9 @@ import { useAuth } from "@clerk/clerk-expo";
 export default function HomeScreen() {
   const { isSignedIn } = useAuth();
 
-  if (!isSignedIn) {
-    return <Redirect href="/login" />;
-  }
+  // if (!isSignedIn) {
+  //   return <Redirect href="/login" />;
+  // }
 
   return (
     <View style={styles.container}>

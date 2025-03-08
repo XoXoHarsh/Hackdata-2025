@@ -20,7 +20,13 @@ import {
   useAuthRequest,
   ResponseType,
 } from "expo-auth-session";
-import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import {
+  GoogleSignin,
+  isSuccessResponse,
+  isErrorWithCode,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
+import { GoogleSigninButton } from "@react-native-google-signin/google-signin";
 
 // export const useWarmUpBrowser = () => {
 //   useEffect(() => {
@@ -35,47 +41,54 @@ import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 WebBrowser.maybeCompleteAuthSession();
 
-const discovery = {
-  authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
-  tokenEndpoint: "https://www.googleapis.com/oauth2/v4/token",
-};
-
 export default function LoginPage() {
   // useWarmUpBrowser();
   const router = useRouter();
 
   const [userInfo, setUserInfo] = useState(null);
+  const [showMessage, setShowMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handlePhone = useCallback(async () => {}, []);
 
   const handleGoogleSignIn = useCallback(async () => {
-    // const clientId = process.env.GOOGLE_CLIENT_ID;
-    // if (!clientId) {
-    //   throw new Error("Missing GOOGLE_CLIENT_ID in environment variables.");
-    // }
-    // const [request, response, promptAsync] = useAuthRequest(
-    //   {
-    //     responseType: ResponseType.Token,
-    //     clientId,
-    //     scopes: ["email", "profile"],
-    //     redirectUri: makeRedirectUri({
-    //       scheme: "lifestyle",
-    //     }),
-    //   },
-    //   discovery
-    // );
-    // const token = await promptAsync();
-    // console.log("token is: ", token);
-    // if (response?.type === "success") {
-    //   const { access_token } = response.params;
-    //   const userInfoResponse = await fetch(
-    //     `https://www.googleapis.com/oauth2/v1/userinfo?access_token=${access_token}`
-    //   );
-    //   const userInfo = await userInfoResponse.json();
-    //   setUserInfo(userInfo);
-    //   router.push("/dashboard");
-    // }
+    await GoogleSignin.hasPlayServices();
+    const response = await GoogleSignin.signIn();
+    setIsSubmitting(true);
+    try {
+      if (isSuccessResponse(response)) {
+        const { idToken, user } = response.data;
+        const { name, email, photo } = user;
+      }
+    } catch (error) {
+      if (isErrorWithCode(error)) {
+        console.log("error while logging in: ", error);
+        switch (error.code) {
+          case statusCodes.SIGN_IN_CANCELLED:
+            setShowMessage("User cancelled the login flow");
+            break;
+          case statusCodes.IN_PROGRESS:
+            setShowMessage("Operation (e.g. sign in) is in progress already");
+            break;
+          case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+            setShowMessage("Play services not available or outdated");
+            break;
+          default:
+            setShowMessage("Some other error happened");
+            break;
+        }
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   }, [router]);
+
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId:
+        "370044489989-lr9h0vmph28lh987pj480r666gu18dg5.apps.googleusercontent.com",
+    });
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -96,10 +109,8 @@ export default function LoginPage() {
               <Text style={styles.logoText}>L</Text>
             </LinearGradient>
           </View>
-
           <Text style={styles.title}>Welcome to Lifestyle</Text>
           <Text style={styles.subtitle}>Sign in to continue your journey</Text>
-
           {/* Phone Number Input with Country Code */}
           {/* <View style={styles.inputContainer}>
             <View style={styles.countryCode}>
@@ -112,7 +123,6 @@ export default function LoginPage() {
               placeholderTextColor="#A0AEC0"
             />
           </View> */}
-
           {/* Continue Button with Gradient */}
           {/* <TouchableOpacity
             style={styles.buttonContainer}
@@ -127,14 +137,12 @@ export default function LoginPage() {
               <Text style={styles.phoneText}>Continue with Phone</Text>
             </LinearGradient>
           </TouchableOpacity> */}
-
           {/* OR Divider */}
           {/* <View style={styles.dividerContainer}>
             <View style={styles.divider} />
             <Text style={styles.dividerText}>OR</Text>
             <View style={styles.divider} />
           </View> */}
-
           {/* Google Sign-In */}
           <TouchableOpacity
             style={styles.googleButton}
@@ -148,8 +156,13 @@ export default function LoginPage() {
             />
             <Text style={styles.googleText}>Continue with Google</Text>
           </TouchableOpacity>
-
-          {/* Terms and Privacy */}
+          <GoogleSigninButton
+            size={GoogleSigninButton.Size.Wide}
+            color={GoogleSigninButton.Color.Dark}
+            onPress={handleGoogleSignIn}
+            // disabled={isInProgress}
+          />
+          ;{/* Terms and Privacy */}
           <Text style={styles.termsText}>
             By continuing, you agree to our{" "}
             <Text style={styles.textLink}>Terms of Service</Text> and{" "}

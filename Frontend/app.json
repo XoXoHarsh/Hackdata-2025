@@ -24,16 +24,7 @@
     },
     "plugins": [
       "expo-router",
-      [
-        "expo-splash-screen",
-        "@react-native-google-signin/google-signin",
-        {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
-        }
-      ]
+      ["expo-splash-screen", "@react-native-google-signin/google-signin"]
     ],
     "experiments": {
       "typedRoutes": true

@@ -13,10 +13,9 @@ Instead of relying on large, resource-intensive LLMs, it uses multiple small, fi
 The chatbot efficiently routes queries to the appropriate LLM using a classifier, making responses faster, accurate, and more affordable.  
 
 ### Key Features  
-- **Lightweight and fast** – Uses small, task-specific LLMs instead of massive AI models.  
-- **Multilingual support** – Utilizes Bharat models for 22 Indian languages.  
+- **Lightweight and fast** – Uses small, task-specific LLMs instead of massive AI models.   
 - **Scalable microservices architecture** – Built with FastAPI and Docker.  
-- **Affordable and efficient** – Reduces cloud computing costs for healthcare chatbots.  
+
 
 ---
 
@@ -25,14 +24,10 @@ The chatbot efficiently routes queries to the appropriate LLM using a classifier
 ### Frontend (Mobile App) – React Native  
 - **React Native (TypeScript)** – Cross-platform mobile framework  
 - **React Navigation** – Smooth screen transitions  
-- **Redux Toolkit / Zustand** – State management  
-- **React Query** – API call optimization  
+
 
 ### Backend – Python (FastAPI + Microservices)  
 - **FastAPI** – High-performance API framework  
-- **PostgreSQL** – Secure database for storing user data  
-- **Redis** – Caching system for faster chatbot responses  
-- **Celery** – Background task handling  
 - **Docker & Kubernetes** – Containerized deployment  
 
 ### AI & Machine Learning  

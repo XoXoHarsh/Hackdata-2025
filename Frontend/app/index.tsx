@@ -78,11 +78,11 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.container}>
       {/* App Header */}
       <View style={styles.header}>
-        <Image
+        {/* <Image
           source={require("../assets/images/icon.png")}
           style={styles.logo}
           resizeMode="contain"
-        />
+        /> */}
         <Text style={styles.headerTitle}>LifeStyle</Text>
 
         {/* Using an explicit arrow function to ensure binding */}

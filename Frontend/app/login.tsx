@@ -67,11 +67,11 @@ export default function LoginScreen() {
 
         <View style={styles.content}>
           <View style={styles.logoContainer}>
-            <Image
+            {/* <Image
               source={require("../assets/images/icon.png")}
               style={styles.logo}
               resizeMode="contain"
-            />
+            /> */}
             <Text style={styles.appName}>Lifestyle</Text>
             <Text style={styles.tagline}>Your smart data platform</Text>
           </View>

@@ -12,6 +12,8 @@ Instead of relying on large, resource-intensive LLMs, it uses multiple small, fi
 
 The chatbot efficiently routes queries to the appropriate LLM using a classifier, making responses faster, accurate, and more affordable.  
 
+![diagram-export-3-9-2025-12_07_38-AM](https://github.com/user-attachments/assets/8aba931d-8cb8-4729-8662-46afe71a580d)
+
 ### Key Features  
 - **Lightweight and fast** – Uses small, task-specific LLMs instead of massive AI models.   
 - **Scalable microservices architecture** – Built with FastAPI and Docker.  

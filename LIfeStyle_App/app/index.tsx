@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useUser } from "@clerk/clerk-expo";
 import { setUser } from "@/utils/userStore";
 import { clearUser } from "@/utils/userStore";
+import axios from "axios";
 
 export default function HomeScreen() {
   const { isSignedIn, signOut } = useAuth();
@@ -31,8 +32,28 @@ export default function HomeScreen() {
 
   setUser(userInfo);
 
+  const sendReq = async () => {
+    console.log("userInfo is.......: ", userInfo);
+    console.log(
+      "process.env.EXPO_PUBLIC_API_URL is: ",
+      `${process.env.EXPO_PUBLIC_API_URL}/users/googleAuth`
+    );
+    const response = await axios.post(
+      "/googleAuth",
+      { user: userInfo },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+      }
+    );
+    console.log("response is: ", response);
+  };
+
   // Debug logging to verify component mounting
   useEffect(() => {
+    sendReq();
     console.log("HomeScreen mounted, isSignedIn:", isSignedIn);
     return () => console.log("HomeScreen unmounted");
   }, [isSignedIn]);

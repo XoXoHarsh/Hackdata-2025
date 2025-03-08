@@ -26,27 +26,39 @@ const generateAccessToken = async (userId) => {
 };
 
 const googleAuth = async (req, res) => {
+  console.log("Google Auth Request:", req.body);
   try {
-    const { idToken } = req.body;
-    const ticket = await client.verifyIdToken({
-      idToken,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
-    const { email, name, sub: googleId } = ticket.getPayload();
+    const { user } = req.body;
 
-    let user = await User.findOne({ email });
-    if (!user) {
-      user = await User.create({ email, name, googleId });
+    if (!user || !user.email) {
+      return res.status(400).json(new ApiError(400, "Invalid user data"));
     }
 
-    const accessToken = generateAccessToken(user._id);
+    let existingUser = await User.findOne({ email: user.email });
+
+    if (!existingUser) {
+      existingUser = await User.create({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        image: user.image,
+      });
+    } else {
+      // Optional: Update user info if they already exist
+      existingUser.firstName = user.firstName;
+      existingUser.lastName = user.lastName;
+      existingUser.image = user.image;
+      await existingUser.save();
+    }
+
+    const { accessToken } = await generateAccessToken(existingUser._id);
 
     return res
       .status(200)
       .json(
         new ApiResponse(
           200,
-          { user, accessToken },
+          { user: existingUser, accessToken },
           "User authenticated successfully"
         )
       );

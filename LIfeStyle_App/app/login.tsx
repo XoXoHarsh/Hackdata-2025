@@ -49,7 +49,7 @@ export default function LoginScreen() {
         await setActive!({ session: createdSessionId });
 
         // const response = await axios.post(
-        //   `${process.env.API_URL}/users/googleAuth`,
+        //   `${process.env.EXPO_PUBLIC_API_URL}/users/googleAuth`,
         //   { createdSessionId }
         // );
 

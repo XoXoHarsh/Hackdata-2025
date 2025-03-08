@@ -25,12 +25,14 @@ The chatbot efficiently routes queries to the appropriate LLM using a classifier
 
 ### Frontend (Mobile App) – React Native  
 - **React Native (TypeScript)** – Cross-platform mobile framework  
-- **React Navigation** – Smooth screen transitions  
+-  **Expo (TypeScript)** – Simplifies React Native development
 
 
 ### Backend – Python (FastAPI + Microservices)  
 - **FastAPI** – High-performance API framework  
-- **Docker & Kubernetes** – Containerized deployment  
+- **Docker** – To run Containerized model
+- **Node** - Authentication and metric collection
+- **FireBase FCM** - Real time notifications and alerts
 
 ### AI & Machine Learning  
 - **Ollama** – Running small LLMs locally  

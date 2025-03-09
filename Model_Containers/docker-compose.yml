@@ -6,27 +6,37 @@ services:
     environment:
       - MODEL_URL=https://huggingface.co/XoXoHarsh/diet-assistant-llama3/resolve/main/unsloth.Q4_K_M.gguf?download=true
       - MODEL_FILENAME=smllm
-    # restart: unless-stopped
+      - MODEL_NUMBER=1
+      - OLLAMA_HOST=0.0.0.0:11434
+    restart: unless-stopped
     container_name: diet-ai
+    volumes:
+      - ./models:/app/models
 
-  # stress-ai:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "8005:11434"
-  #   environment:
-  #     - MODEL_URL=https://huggingface.co/XoXoHarsh/stress-assistant-tinyllama/resolve/main/unsloth.Q4_K_M.gguf?download=true
-  #   restart: unless-stopped
-  #   container_name: stress-ai
+  stress-ai:
+    build: .
+    ports:
+      - "8005:11434"
+    environment:
+      - MODEL_URL=https://huggingface.co/XoXoHarsh/stress-assistant-tinyllama/resolve/main/unsloth.Q4_K_M.gguf?download=true
+      - OLLAMA_HOST=0.0.0.0:11434
+      - MODEL_FILENAME=smllm
+      - MODEL_NUMBER=2
+    restart: unless-stopped
+    container_name: stress-ai
+    volumes:
+      - ./models:/app/models
 
-  # exercise-ai:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "8006:11434"
-  #   environment:
-  #     - MODEL_URL=https://huggingface.co/XoXoHarsh/exercise-assistant-tinyllama/resolve/main/unsloth.Q4_K_M.gguf?download=true
-  #   restart: unless-stopped
-  #   container_name: exercise-ai
+  exercise-ai:
+    build: .
+    ports:
+      - "8006:11434"
+    environment:
+      - MODEL_URL=https://huggingface.co/XoXoHarsh/exercise-assistant-tinyllama/resolve/main/unsloth.Q4_K_M.gguf?download=true
+      - MODEL_NUMBER=3
+      - MODEL_FILENAME=smllm
+      - OLLAMA_HOST=0.0.0.0:11434
+    restart: unless-stopped
+    container_name: exercise-ai
+    volumes:
+      - ./models:/app/models

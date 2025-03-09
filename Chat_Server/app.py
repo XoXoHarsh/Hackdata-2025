@@ -14,26 +14,20 @@ except Exception as e:
     logging.error(f"Error loading model: {e}")
     model = None
 
-
-
-# Configure logging
 logging.basicConfig(level=logging.INFO)
 
-# FastAPI setup
 app = FastAPI()
 
 from fastapi.middleware.cors import CORSMiddleware
 
-# Enable CORS in FastAPI
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Change this to your frontend domain in production
+    allow_origins=["*"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# URL mappings for categories
 CATEGORY_URLS = {
     0: "http://localhost:8004/api/generate",
     1: "http://localhost:8005/api/generate",
@@ -44,7 +38,7 @@ OLLAMA_URL = "http://localhost:11434/api/generate"
 OLLAMA_MODEL = "test"
 
 class MessageRequest(BaseModel):
-    message: str  # Frontend will send a 'message' field
+    message: str  
 
 def classify_message(message: str):
     """
@@ -53,11 +47,11 @@ def classify_message(message: str):
     """
     if model is None:
         logging.error("Model is not loaded. Using default classification.")
-        return 0  # Default category if model isn't loaded
+        return 0  
 
     try:
-        # Apply the same TF-IDF vectorization and predict
-        category = model.predict([message])[0]  # Get prediction
+        
+        category = model.predict([message])[0]  
         if category == "Exercise":
             return 2
         elif category == "Stress":
@@ -66,17 +60,7 @@ def classify_message(message: str):
             return 0
     except Exception as e:
         logging.error(f"Model classification error: {e}")
-        return 0  # Default category on failureDefault category on failure
-
-
-    # message = message.lower()
-
-    # if any(word in message for word in ["exercise", "workout", "gym", "running"]):
-    #     return 2  # Exercise
-    # elif any(word in message for word in ["stress", "well being", "anxiety", "depression"]):
-    #     return 1  # Stress
-    # else:
-    #     return 0
+        return 0 
 
 async def generate_ollama_response(prompt: str, category_number: int):
     """
@@ -101,25 +85,12 @@ async def classify_message_api(request: MessageRequest):
     category_number = classify_message(request.message)
     service_url = CATEGORY_URLS.get(category_number)
 
-    # Log classification
     logging.info(f"Predicted Category Number: {category_number}")
     logging.info(f"Mapped Service URL: {service_url}")
 
-    # Fetch the classified service response
-    # async with httpx.AsyncClient() as client:
-    #     try:
-    #         service_response = await client.post(service_url, json={"prompt": request.message})
-    #         service_response_data = service_response.json()
-    #         final_prompt = service_response_data.get("response", request.message)  # Use service response for AI
-    #     except Exception as e:
-    #         logging.error(f"Error calling service: {e}")
-    #         final_prompt = request.message  # Default to user input if service fails
-
-    # Get a response from Ollama
     ollama_response = await generate_ollama_response(request.message, category_number)
 
-    return {"response": ollama_response}  # ✅ Only Ollama's response is sent to frontend
+    return {"response": ollama_response}  
 
-# Run FastAPI on port 8001
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8001)

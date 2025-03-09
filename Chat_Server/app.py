@@ -3,6 +3,18 @@ import uvicorn
 import httpx
 from fastapi import FastAPI
 from pydantic import BaseModel
+import pickle
+
+MODEL_PATH="question_classifier_model.pkl"
+try:
+    with open(MODEL_PATH, "rb") as f:
+        model = pickle.load(f)
+    logging.info("Model loaded")
+except Exception as e:
+    logging.error(f"Error loading model: {e}")
+    model = None
+
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -39,14 +51,32 @@ def classify_message(message: str):
     A simple rule-based classification function.
     Returns a category number.
     """
-    message = message.lower()
+    if model is None:
+        logging.error("Model is not loaded. Using default classification.")
+        return 0  # Default category if model isn't loaded
 
-    if any(word in message for word in ["exercise", "workout", "gym", "running"]):
-        return 2  # Exercise
-    elif any(word in message for word in ["stress", "well being", "anxiety", "depression"]):
-        return 1  # Stress
-    else:
-        return 0
+    try:
+        # Apply the same TF-IDF vectorization and predict
+        category = model.predict([message])[0]  # Get prediction
+        if category == "Exercise":
+            return 2
+        elif category == "Stress":
+            return 1
+        else:
+            return 0
+    except Exception as e:
+        logging.error(f"Model classification error: {e}")
+        return 0  # Default category on failureDefault category on failure
+
+
+    # message = message.lower()
+
+    # if any(word in message for word in ["exercise", "workout", "gym", "running"]):
+    #     return 2  # Exercise
+    # elif any(word in message for word in ["stress", "well being", "anxiety", "depression"]):
+    #     return 1  # Stress
+    # else:
+    #     return 0
 
 async def generate_ollama_response(prompt: str, category_number: int):
     """

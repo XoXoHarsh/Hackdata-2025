@@ -23,15 +23,13 @@ app.add_middleware(
 
 # URL mappings for categories
 CATEGORY_URLS = {
-    0: "http://localhost:8001/exercise",
-    1: "http://localhost:8002/daily-routine",
-    2: "http://localhost:8003/diet",
-    3: "http://localhost:8004/stress",
-    4: "http://localhost:8005/others",
+    0: "http://localhost:8004/api/generate",
+    1: "http://localhost:8005/api/generate",
+    2: "http://localhost:8006/api/generate",
 }
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
-OLLAMA_MODEL = "llama3.2"
+OLLAMA_MODEL = "test"
 
 class MessageRequest(BaseModel):
     message: str  # Frontend will send a 'message' field
@@ -44,29 +42,25 @@ def classify_message(message: str):
     message = message.lower()
 
     if any(word in message for word in ["exercise", "workout", "gym", "running"]):
-        return 0  # Exercise
-    elif any(word in message for word in ["routine", "schedule", "habit", "daily"]):
-        return 1  # Daily Routine
-    elif any(word in message for word in ["diet", "nutrition", "food", "eat", "meal"]):
-        return 2  # Diet
-    elif any(word in message for word in ["stress", "anxiety", "mental", "depression", "well-being"]):
-        return 3  # Stress / Mental Well-being
+        return 2  # Exercise
+    elif any(word in message for word in ["stress", "well being", "anxiety", "depression"]):
+        return 1  # Stress
     else:
-        return 4  # Others
+        return 0
 
-async def generate_ollama_response(prompt: str):
+async def generate_ollama_response(prompt: str, category_number: int):
     """
     Sends the message to the Ollama model and gets a response.
     """
-    payload = {"model": OLLAMA_MODEL, "prompt": prompt}
+    payload = {"model": OLLAMA_MODEL, "prompt": prompt, "stream": False}
 
     async with httpx.AsyncClient() as client:
-        response = await client.post(OLLAMA_URL, json=payload)
+        response = await client.post(CATEGORY_URLS[category_number], json=payload)
         response_data = response.json()
     
     return response_data.get("response", "No response from model")
 
-@app.post("/classify-message/")
+@app.post("/classify-message")
 async def classify_message_api(request: MessageRequest):
     """
     Receives a message, classifies it, fetches a response from the mapped service,
@@ -82,17 +76,17 @@ async def classify_message_api(request: MessageRequest):
     logging.info(f"Mapped Service URL: {service_url}")
 
     # Fetch the classified service response
-    async with httpx.AsyncClient() as client:
-        try:
-            service_response = await client.post(service_url, json={"text": request.message})
-            service_response_data = service_response.json()
-            final_prompt = service_response_data.get("response", request.message)  # Use service response for AI
-        except Exception as e:
-            logging.error(f"Error calling service: {e}")
-            final_prompt = request.message  # Default to user input if service fails
+    # async with httpx.AsyncClient() as client:
+    #     try:
+    #         service_response = await client.post(service_url, json={"prompt": request.message})
+    #         service_response_data = service_response.json()
+    #         final_prompt = service_response_data.get("response", request.message)  # Use service response for AI
+    #     except Exception as e:
+    #         logging.error(f"Error calling service: {e}")
+    #         final_prompt = request.message  # Default to user input if service fails
 
     # Get a response from Ollama
-    ollama_response = await generate_ollama_response(final_prompt)
+    ollama_response = await generate_ollama_response(request.message, category_number)
 
     return {"response": ollama_response}  # ✅ Only Ollama's response is sent to frontend
 

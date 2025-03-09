@@ -60,14 +60,20 @@ export default function ChatScreen() {
     // In a real app, this would be an API call to your AI service
     console.log("called getAIResponse ", process.env.EXPO_PUBLIC_CHAT_SERVER);
     if (language === "en") {
-      const response = await axios.post(
-        `${process.env.EXPO_PUBLIC_CHAT_SERVER}`,
-        {
-          message: userMessage,
-        }
-      );
-      console.log("response is: >>>>>>>>>>>> ", response);
-      return response.data.response;
+      console.log("called getAIResponse ", process.env.EXPO_PUBLIC_CHAT_SERVER);
+      try {
+        const response = await axios.post(
+          `${process.env.EXPO_PUBLIC_CHAT_SERVER}`,
+          {
+            message: userMessage,
+          }
+        );
+        console.log("response is: >>>>>>>>>>>> ", response);
+        return response.data.response;
+      } catch (err) {
+        console.log("error is: >>>>>>>>>>>> ", err);
+        // return `namaste! "${userMessage}". or sb badhiya?`;
+      }
     } else {
       return `namaste! "${userMessage}". or sb badhiya?`;
     }

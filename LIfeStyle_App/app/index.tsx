@@ -39,7 +39,7 @@ export default function HomeScreen() {
       `${process.env.EXPO_PUBLIC_API_URL}/users/googleAuth`
     );
     const response = await axios.post(
-      "/googleAuth",
+      `${process.env.EXPO_PUBLIC_API_URL}/users/googleAuth`,
       { user: userInfo },
       {
         headers: {
@@ -48,7 +48,7 @@ export default function HomeScreen() {
         },
       }
     );
-    console.log("response is: ", response);
+    // console.log("response is: ", response);
   };
 
   // Debug logging to verify component mounting

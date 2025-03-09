@@ -16,20 +16,21 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import axios from "axios";
 
 // Message type definition
 interface Message {
   id: string;
-  text: string;
+  text: any;
   isUser: boolean;
-  language: "en" | "es";
+  language: "en" | "hi";
   timestamp: Date;
 }
 
 // Language options
 const LANGUAGES = [
   { code: "en", name: "English", flag: "🇺🇸" },
-  { code: "es", name: "Spanish", flag: "🇪🇸" },
+  // { code: "hi", name: "Hindi", flag: "🇮🇳" },
 ];
 
 export default function ChatScreen() {
@@ -43,27 +44,32 @@ export default function ChatScreen() {
       language: "en",
       timestamp: new Date(),
     },
-    {
-      id: "2",
-      text: "kya hua bhai?",
-      isUser: false,
-      language: "es",
-      timestamp: new Date(),
-    },
+    // {
+    //   id: "2",
+    //   text: "kya hua bhai?",
+    //   isUser: false,
+    //   language: "es",
+    //   timestamp: new Date(),
+    // },
   ]);
-  const [activeLanguage, setActiveLanguage] = useState<"en" | "es">("en");
+  const [activeLanguage, setActiveLanguage] = useState<"en" | "hi">("en");
   const flatListRef = useRef<FlatList>(null);
 
   // Mock AI response function
-  const getAIResponse = (
-    userMessage: string,
-    language: "en" | "es"
-  ): string => {
+  const getAIResponse = async (userMessage: string, language: "en" | "hi") => {
     // In a real app, this would be an API call to your AI service
+    console.log("called getAIResponse ", process.env.EXPO_PUBLIC_CHAT_SERVER);
     if (language === "en") {
-      return `I received your message: "${userMessage}". How can I assist you further?`;
+      const response = await axios.post(
+        `${process.env.EXPO_PUBLIC_CHAT_SERVER}`,
+        {
+          message: userMessage,
+        }
+      );
+      console.log("response is: >>>>>>>>>>>> ", response);
+      return response.data.response;
     } else {
-      return `Recibí tu mensaje: "${userMessage}". ¿Cómo puedo ayudarte más?`;
+      return `namaste! "${userMessage}". or sb badhiya?`;
     }
   };
 
@@ -78,6 +84,7 @@ export default function ChatScreen() {
       language: activeLanguage,
       timestamp: new Date(),
     };
+    console.log("handleSend called >>>>>");
 
     // Clear input
     setMessage("");
@@ -86,23 +93,31 @@ export default function ChatScreen() {
     setMessages((prevMessages) => [...prevMessages, userMessage]);
 
     // Simulate AI response after a short delay
-    setTimeout(() => {
-      const aiResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        text: getAIResponse(message, activeLanguage),
-        isUser: false,
-        language: activeLanguage,
-        timestamp: new Date(),
-      };
-      setMessages((prevMessages) => [...prevMessages, aiResponse]);
+    // setTimeout(() => {
+    //   const aiResponse: Message = {
+    //     id: (Date.now() + 1).toString(),
+    //     text: getAIResponse(message, activeLanguage),
+    //     isUser: false,
+    //     language: activeLanguage,
+    //     timestamp: new Date(),
+    //   };
+    //   setMessages((prevMessages) => [...prevMessages, aiResponse]);
 
-      // Scroll to bottom
-      flatListRef.current?.scrollToEnd({ animated: true });
-    }, 1000);
+    //   // Scroll to bottom
+    //   flatListRef.current?.scrollToEnd({ animated: true });
+    // }, 1000);
+    const aiResponse: Message = {
+      id: (Date.now() + 1).toString(),
+      text: getAIResponse(message, activeLanguage),
+      isUser: false,
+      language: activeLanguage,
+      timestamp: new Date(),
+    };
+    setMessages((prevMessages) => [...prevMessages, aiResponse]);
   }, [message, activeLanguage]);
 
   const toggleLanguage = () => {
-    setActiveLanguage((prev) => (prev === "en" ? "es" : "en"));
+    setActiveLanguage((prev) => (prev === "en" ? "hi" : "en"));
   };
 
   const formatTime = (date: Date) => {
@@ -187,7 +202,7 @@ export default function ChatScreen() {
       />
 
       {/* Language indicator banner */}
-      <View style={styles.languageBanner}>
+      {/* <View style={styles.languageBanner}>
         <Text style={styles.languageBannerText}>
           Currently chatting in:{" "}
           {activeLanguage === "en" ? "English 🇺🇸" : "Spanish 🇪🇸"}
@@ -195,7 +210,7 @@ export default function ChatScreen() {
         <TouchableOpacity onPress={toggleLanguage} style={styles.switchButton}>
           <Text style={styles.switchButtonText}>Switch</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
 
       {/* Input Area */}
       <KeyboardAvoidingView
@@ -237,7 +252,7 @@ export default function ChatScreen() {
                 styles.languageChip,
                 activeLanguage === lang.code && styles.activeLanguageChip,
               ]}
-              onPress={() => setActiveLanguage(lang.code as "en" | "es")}
+              onPress={() => setActiveLanguage(lang.code as "en" | "hi")}
             >
               <Text style={styles.languageChipText}>
                 {lang.flag} {lang.name}

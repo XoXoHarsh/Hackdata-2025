@@ -44,7 +44,6 @@ const googleAuth = async (req, res) => {
         image: user.image,
       });
     } else {
-      // Optional: Update user info if they already exist
       existingUser.firstName = user.firstName;
       existingUser.lastName = user.lastName;
       existingUser.image = user.image;

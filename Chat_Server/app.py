@@ -1,107 +1,101 @@
 import logging
+import uvicorn
+import httpx
 from fastapi import FastAPI
 from pydantic import BaseModel
-from transformers import DistilBertTokenizer, DistilBertForSequenceClassification
-import torch
-import httpx
-
-# Load the locally saved model
-MODEL_PATH = "./fine_tuned_model"
-tokenizer = DistilBertTokenizer.from_pretrained(MODEL_PATH)
-model = DistilBertForSequenceClassification.from_pretrained(MODEL_PATH)
-
-LABELS = ["Exercise", "Daily Routine", "Diet", "Stress Mental Well-being", "Others"]
-
-# Classification function
-def classify_text(text):
-    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True)
-    with torch.no_grad():
-        outputs = model(**inputs)
-    logits = outputs.logits
-    probabilities = torch.nn.functional.softmax(logits, dim=-1)  # Convert to probabilities
-    predicted_class = torch.argmax(probabilities).item()
-
-    # Debug logs
-    logging.info(f"Logits: {logits}")
-    logging.info(f"Predicted Class Index: {predicted_class}")
-    logging.info(f"Probabilities: {probabilities}")
-    logging.info(f"Total Labels: {len(LABELS)}")
-
-    # Ensure the predicted class index is within range
-    if predicted_class >= len(LABELS):  
-        return "Uncertain / Others"
-
-    # Custom confidence threshold
-    confidence = probabilities[0][predicted_class].item()
-    if confidence < 0.5:  # Adjust this threshold based on printed probabilities
-        return "Uncertain / Others"
-
-    return LABELS[predicted_class]
-
-
-# FastAPI setup
-app = FastAPI()
-
-class TextRequest(BaseModel):
-    text: str
-
-# // hello
-
-# Dictionary mapping categories to service URLs
-SERVICE_URLS = {
-    "Exercise": "http://localhost:8001/exercise",
-    "Daily Routine": "http://localhost:8002/daily-routine",
-    "Diet": "http://localhost:8003/diet",
-    "Stress Mental Well-being": "http://localhost:8004/stress",
-    "Others": "http://localhost:8005/others",
-   
-}
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
-@app.post("/classify/")
-def classify(request: TextRequest):
-    category = classify_text(request.text)
-    service_url = SERVICE_URLS.get(category, SERVICE_URLS["Others"])
-    
-    # Send the classified text to the corresponding service
-    response = httpx.post(service_url, json={"text": request.text})
-    
-    # Log the category and service response
-    logging.info(f"Classified Category: {category}")
-    logging.info(f"Service Response: {response.json()}")
-    
-    return {"category": category, "service_response": response.json()}
+# FastAPI setup
+app = FastAPI()
 
-@app.get("/example/")
-def example():
-    example_text = "I feel stressed due to work pressure."
-    category = classify_text(example_text)
-    service_url = SERVICE_URLS.get(category, SERVICE_URLS["Others"])
-    
-    # Send the classified text to the corresponding service
-    response = httpx.post(service_url, json={"text": example_text})
-    
-    # Log the text and the response
-    logging.info(f"Text: {example_text}")
-    logging.info(f"Category: {category}")
-    logging.info(f"Response: {response.json()}")
-    
-    return {"category": category, "service_response": response.json()}
+from fastapi.middleware.cors import CORSMiddleware
 
-@app.get("/sample-test/")
-def sample_test():
-    sample_text = "I need to improve my diet."
-    category = classify_text(sample_text)
-    service_url = SERVICE_URLS.get(category, SERVICE_URLS["Others"])
+# Enable CORS in FastAPI
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Change this to your frontend domain in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# URL mappings for categories
+CATEGORY_URLS = {
+    0: "http://localhost:8001/exercise",
+    1: "http://localhost:8002/daily-routine",
+    2: "http://localhost:8003/diet",
+    3: "http://localhost:8004/stress",
+    4: "http://localhost:8005/others",
+}
+
+OLLAMA_URL = "http://localhost:11434/api/generate"
+OLLAMA_MODEL = "llama3.2"
+
+class MessageRequest(BaseModel):
+    message: str  # Frontend will send a 'message' field
+
+def classify_message(message: str):
+    """
+    A simple rule-based classification function.
+    Returns a category number.
+    """
+    message = message.lower()
+
+    if any(word in message for word in ["exercise", "workout", "gym", "running"]):
+        return 0  # Exercise
+    elif any(word in message for word in ["routine", "schedule", "habit", "daily"]):
+        return 1  # Daily Routine
+    elif any(word in message for word in ["diet", "nutrition", "food", "eat", "meal"]):
+        return 2  # Diet
+    elif any(word in message for word in ["stress", "anxiety", "mental", "depression", "well-being"]):
+        return 3  # Stress / Mental Well-being
+    else:
+        return 4  # Others
+
+async def generate_ollama_response(prompt: str):
+    """
+    Sends the message to the Ollama model and gets a response.
+    """
+    payload = {"model": OLLAMA_MODEL, "prompt": prompt}
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(OLLAMA_URL, json=payload)
+        response_data = response.json()
     
-    # Send the classified text to the corresponding service
-    response = httpx.post(service_url, json={"text": sample_text})
+    return response_data.get("response", "No response from model")
+
+@app.post("/classify-message/")
+async def classify_message_api(request: MessageRequest):
+    """
+    Receives a message, classifies it, fetches a response from the mapped service,
+    then queries Ollama for the final response, which is sent to the frontend.
+    """
+    logging.info(f"Received Message: {request.message}")
     
-    # Log the text and the response
-    logging.info(f"Sample Text: {sample_text}")
-    logging.info(f"Category: {category}")
-    logging.info(f"Service Response: {response.json()}")
-    
-    return {"sample_text": sample_text, "category": category, "service_response": response.json()}
+    category_number = classify_message(request.message)
+    service_url = CATEGORY_URLS.get(category_number)
+
+    # Log classification
+    logging.info(f"Predicted Category Number: {category_number}")
+    logging.info(f"Mapped Service URL: {service_url}")
+
+    # Fetch the classified service response
+    async with httpx.AsyncClient() as client:
+        try:
+            service_response = await client.post(service_url, json={"text": request.message})
+            service_response_data = service_response.json()
+            final_prompt = service_response_data.get("response", request.message)  # Use service response for AI
+        except Exception as e:
+            logging.error(f"Error calling service: {e}")
+            final_prompt = request.message  # Default to user input if service fails
+
+    # Get a response from Ollama
+    ollama_response = await generate_ollama_response(final_prompt)
+
+    return {"response": ollama_response}  # ✅ Only Ollama's response is sent to frontend
+
+# Run FastAPI on port 8001
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8001)

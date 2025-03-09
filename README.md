@@ -43,7 +43,7 @@ The chatbot efficiently routes queries to the appropriate LLM using a classifier
 
 - **Ollama** – Running small LLMs locally  
 - **Fine-tuned llama3-8b** – Custom-trained on health topics
-- **Unsloth** - For finetuning the llama3 model.
+- **Unsloth** - For finetuning the llama3-8b and tinyllama model.
 
 ---
 
@@ -75,6 +75,7 @@ Hackdata-2025
 │   │   ├── ...
 │   ├── package.json
 │   ├── ...
+├── Model_Containers/       # Scripts to run the models in containers
 └── README.md
 ```
 

@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Link, Redirect, useRouter } from "expo-router";
+import { Redirect, useRouter } from "expo-router";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
-  Image,
   Alert,
 } from "react-native";
 import { useAuth } from "@clerk/clerk-expo";
@@ -33,11 +32,6 @@ export default function HomeScreen() {
   setUser(userInfo);
 
   const sendReq = async () => {
-    console.log("userInfo is.......: ", userInfo);
-    console.log(
-      "process.env.EXPO_PUBLIC_API_URL is: ",
-      `${process.env.EXPO_PUBLIC_API_URL}/users/googleAuth`
-    );
     const response = await axios.post(
       `${process.env.EXPO_PUBLIC_API_URL}/users/googleAuth`,
       { user: userInfo },
@@ -48,46 +42,32 @@ export default function HomeScreen() {
         },
       }
     );
-    // console.log("response is: ", response);
   };
 
-  // Debug logging to verify component mounting
   useEffect(() => {
     sendReq();
-    console.log("HomeScreen mounted, isSignedIn:", isSignedIn);
     return () => console.log("HomeScreen unmounted");
   }, [isSignedIn]);
 
-  // Using early return pattern for redirection
   if (!isSignedIn) {
-    console.log("Not signed in, redirecting to login");
     return <Redirect href="/login" />;
   }
 
   const debugTouch = () => {
-    console.log("Button area touched!");
     Alert.alert("Button Pressed", "The logout button was pressed");
   };
 
   const handleSignOut = async () => {
-    debugTouch(); // Will show an alert to confirm button is responsive
+    debugTouch();
 
     try {
-      console.log("inside the handlesignout");
       setIsSigningOut(true);
 
-      // Add a small delay to ensure console.log is visible
       setTimeout(async () => {
         try {
-          console.log("Attempting to sign out...");
           await signOut();
-          console.log("Sign out successful");
-
-          // Force navigation
-          console.log("Navigating to login screen");
           router.replace("/login");
         } catch (error) {
-          console.error("Error in delayed signOut:", error);
           Alert.alert(
             "Sign Out Error",
             "There was a problem signing out. Please try again."
@@ -96,7 +76,6 @@ export default function HomeScreen() {
         }
       }, 500);
     } catch (error) {
-      console.error("Error in handleSignOut:", error);
       Alert.alert(
         "Sign Out Error",
         "There was a problem signing out. Please try again."
@@ -113,20 +92,13 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* App Header */}
       <View style={styles.header}>
-        {/* <Image
-          source={require("../assets/images/icon.png")}
-          style={styles.logo}
-          resizeMode="contain"
-        /> */}
         <Text style={styles.headerTitle}>LifeStyle</Text>
 
-        {/* Using an explicit arrow function to ensure binding */}
         <TouchableOpacity
           onPress={() => handleSignOut()}
-          style={[styles.logoutButton, { zIndex: 999 }]} // Added zIndex to ensure it's on top
-          activeOpacity={0.6} // Make touch feedback more obvious
+          style={[styles.logoutButton, { zIndex: 999 }]}
+          activeOpacity={0.6}
           disabled={isSigningOut}
         >
           <View
@@ -146,8 +118,6 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Rest of the component remains the same */}
-      {/* Main Content */}
       <View style={styles.content}>
         <View style={styles.card}>
           <Text style={styles.welcomeText}>Welcome to LifeStyle!</Text>
@@ -200,7 +170,6 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
         <TouchableOpacity style={styles.navItem}>
           <Ionicons name="home" size={24} color="#6C63FF" />

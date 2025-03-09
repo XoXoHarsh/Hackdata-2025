@@ -8,16 +8,12 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ImageBackground,
   SafeAreaView,
   Image,
-  Platform,
   ActivityIndicator,
   StatusBar,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import axios from "axios";
 
 export const useWarmUpBrowser = () => {
   useEffect(() => {
@@ -28,7 +24,6 @@ export const useWarmUpBrowser = () => {
   }, []);
 };
 
-// Handle any pending authentication sessions
 WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen() {
@@ -47,14 +42,6 @@ export default function LoginScreen() {
 
       if (createdSessionId) {
         await setActive!({ session: createdSessionId });
-
-        // const response = await axios.post(
-        //   `${process.env.EXPO_PUBLIC_API_URL}/users/googleAuth`,
-        //   { createdSessionId }
-        // );
-
-        // console.log("response is: ", response);
-        // Redirect to index after successful login
         router.replace("/");
       }
     } catch (err) {
@@ -69,7 +56,6 @@ export default function LoginScreen() {
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       <View style={styles.contentContainer}>
-        {/* App Logo/Icon */}
         <View style={styles.logoContainer}>
           <LinearGradient
             colors={["#5A67D8", "#3182CE"]}
@@ -84,11 +70,9 @@ export default function LoginScreen() {
         <Text style={styles.title}>Welcome to Lifestyle</Text>
         <Text style={styles.subtitle}>Sign in to continue your journey</Text>
 
-        {/* Google Sign-In */}
         <TouchableOpacity
           style={styles.googleButton}
           onPress={handleGoogleSignIn}
-          // disabled={isLoading}
         >
           {isLoading ? (
             <ActivityIndicator color="#fff" size="small" />
@@ -105,7 +89,6 @@ export default function LoginScreen() {
           )}
         </TouchableOpacity>
 
-        {/* Terms and Privacy */}
         <Text style={styles.termsText}>
           By continuing, you agree to our{" "}
           <Text style={styles.textLink}>Terms of Service</Text> and{" "}

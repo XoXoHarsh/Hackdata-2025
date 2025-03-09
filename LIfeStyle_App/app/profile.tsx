@@ -12,25 +12,19 @@ import {
   Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { Ionicons, MaterialIcons, Feather } from "@expo/vector-icons";
+import { Ionicons, Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { getUser } from "@/utils/userStore";
 import { useAuth } from "@clerk/clerk-expo";
 import { clearUser } from "@/utils/userStore";
-import axios from "axios";
 
-// Language options
-const LANGUAGES = [
-  { code: "en", name: "English", flag: "🇺🇸" },
-  // { code: "🇮🇳", name: "Hindi", flag: "🇮🇳" },
-];
+const LANGUAGES = [{ code: "en", name: "English", flag: "🇺🇸" }];
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { isSignedIn, signOut } = useAuth();
   const [activeLanguage, setActiveLanguage] = useState("en");
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [darkModeEnabled, setDarkModeEnabled] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   const user = getUser();
@@ -45,19 +39,14 @@ export default function ProfileScreen() {
         text: "Logout",
         onPress: () => {
           try {
-            console.log("inside the handlesignout");
             setIsSigningOut(true);
 
             setTimeout(async () => {
               try {
-                console.log("Attempting to sign out...");
                 await signOut();
-                console.log("Sign out successful");
 
-                console.log("Navigating to login screen");
                 router.replace("/login");
               } catch (error) {
-                console.error("Error in delayed signOut:", error);
                 Alert.alert(
                   "Sign Out Error",
                   "There was a problem signing out. Please try again."
@@ -66,7 +55,6 @@ export default function ProfileScreen() {
               }
             }, 500);
           } catch (error) {
-            console.error("Error in handleSignOut:", error);
             Alert.alert(
               "Sign Out Error",
               "There was a problem signing out. Please try again."
@@ -83,14 +71,13 @@ export default function ProfileScreen() {
 
   const handleLanguageChange = (langCode: string) => {
     setActiveLanguage(langCode);
-    // In a real app, you would update the app's language context here
+    // update the app's language context here
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
-      {/* Header */}
       <LinearGradient
         colors={["#4C51BF", "#3182CE"]}
         start={{ x: 0, y: 0 }}
@@ -113,7 +100,6 @@ export default function ProfileScreen() {
         style={styles.scrollView}
         contentContainerStyle={styles.contentContainer}
       >
-        {/* Profile Photo & Info Section */}
         <View style={styles.profileSection}>
           <View style={styles.photoContainer}>
             <Image
@@ -130,7 +116,6 @@ export default function ProfileScreen() {
           <Text style={styles.userEmail}>{user?.email}</Text>
         </View>
 
-        {/* Settings Sections */}
         <View style={styles.settingsSection}>
           <Text style={styles.sectionTitle}>Language</Text>
 
@@ -166,7 +151,6 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* App Settings */}
         <View style={styles.settingsSection}>
           <Text style={styles.sectionTitle}>App Settings</Text>
 
@@ -190,7 +174,6 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Account Actions */}
         <View style={styles.settingsSection}>
           <Text style={styles.sectionTitle}>Account</Text>
 
@@ -221,7 +204,6 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Logout Button */}
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Ionicons
             name="log-out-outline"

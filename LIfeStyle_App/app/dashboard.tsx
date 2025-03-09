@@ -8,19 +8,12 @@ import {
   Dimensions,
   SafeAreaView,
 } from "react-native";
-import { LineChart, BarChart, PieChart } from "react-native-chart-kit";
-import {
-  Feather,
-  Ionicons,
-  FontAwesome5,
-  MaterialCommunityIcons,
-} from "@expo/vector-icons";
+import { LineChart, PieChart } from "react-native-chart-kit";
+import { Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 
 const { width } = Dimensions.get("window");
 
-// Screen Time Tab Component
 const ScreenTimeTab = () => {
-  // Sample screen time data
   const appUsageData = [
     { name: "Social Media", usage: 152, color: "#FF6384", icon: "instagram" },
     { name: "Entertainment", usage: 98, color: "#36A2EB", icon: "youtube" },
@@ -34,7 +27,6 @@ const ScreenTimeTab = () => {
     { name: "Fitness", usage: 30, color: "#9966FF", icon: "run" },
   ];
 
-  // Weekly screen time data
   const weeklyData = {
     labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
     datasets: [
@@ -44,7 +36,6 @@ const ScreenTimeTab = () => {
     ],
   };
 
-  // Create data for pie chart
   const pieChartData = appUsageData.map((app) => ({
     name: app.name,
     usage: app.usage,
@@ -122,8 +113,8 @@ const ScreenTimeTab = () => {
           yAxisSuffix="h"
           chartConfig={{
             backgroundColor: "#393E6F",
-            backgroundGradientFrom: "#4A4F88", // Slightly lighter bluish-purple
-            backgroundGradientTo: "#2C315C", // Darker bluish-indigo
+            backgroundGradientFrom: "#4A4F88",
+            backgroundGradientTo: "#2C315C",
 
             decimalPlaces: 0,
             color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
@@ -150,9 +141,7 @@ const ScreenTimeTab = () => {
   );
 };
 
-// Fitness Stats Tab Component
 const FitnessStatsTab = () => {
-  // Heart rate data
   const heartRateData = {
     labels: ["6am", "9am", "12pm", "3pm", "6pm", "9pm"],
     datasets: [
@@ -164,7 +153,6 @@ const FitnessStatsTab = () => {
     ],
   };
 
-  // Sleep data
   const sleepData = {
     labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
     datasets: [
@@ -176,7 +164,6 @@ const FitnessStatsTab = () => {
     ],
   };
 
-  // Health metrics
   const healthMetrics = [
     {
       name: "Heart Rate",
@@ -243,8 +230,8 @@ const FitnessStatsTab = () => {
           yAxisSuffix=" bpm"
           chartConfig={{
             backgroundColor: "#393E6F",
-            backgroundGradientFrom: "#4A4F88", // Slightly lighter bluish-purple
-            backgroundGradientTo: "#2C315C", // Darker bluish-indigo
+            backgroundGradientFrom: "#4A4F88",
+            backgroundGradientTo: "#2C315C",
 
             decimalPlaces: 0,
             color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
@@ -327,8 +314,8 @@ const FitnessStatsTab = () => {
           yAxisSuffix="h"
           chartConfig={{
             backgroundColor: "#393E6F",
-            backgroundGradientFrom: "#4A4F88", // Slightly lighter bluish-purple
-            backgroundGradientTo: "#2C315C", // Darker bluish-indigo
+            backgroundGradientFrom: "#4A4F88",
+            backgroundGradientTo: "#2C315C",
             decimalPlaces: 1,
             color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
             labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
@@ -349,13 +336,11 @@ const FitnessStatsTab = () => {
   );
 };
 
-// Main Tracker Component
 export default function DashboardScreen() {
   const [activeTab, setActiveTab] = useState("screenTime");
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <View style={styles.logoContainer}>
           <Text style={styles.logoText}>L</Text>
@@ -363,7 +348,6 @@ export default function DashboardScreen() {
         <Text style={styles.headerTitle}>Lifestyle Tracker</Text>
       </View>
 
-      {/* Tab Navigation */}
       <View style={styles.tabContainer}>
         <TouchableOpacity
           style={[
@@ -410,7 +394,6 @@ export default function DashboardScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Tab Content */}
       {activeTab === "screenTime" ? <ScreenTimeTab /> : <FitnessStatsTab />}
     </SafeAreaView>
   );

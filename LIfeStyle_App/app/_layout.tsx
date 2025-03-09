@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Stack } from "expo-router";
-import { ClerkProvider, ClerkLoaded, useAuth } from "@clerk/clerk-expo";
+import { ClerkProvider, ClerkLoaded } from "@clerk/clerk-expo";
 import { tokenCache } from "@/cache";
-import { ActivityIndicator, View } from "react-native";
 
-// Separate component to handle navigation after Clerk is loaded
 function NavigationStack() {
   return (
     <Stack

@@ -1,37 +1,28 @@
-FROM debian:bookworm-slim
+FROM ubuntu:22.04
 
-# Set environment variables
+# Prevent interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install required dependencies
 RUN apt-get update && apt-get install -y \
     curl \
     wget \
-    git \
-    vim \
     ca-certificates \
     gnupg \
+    lsb-release \
+    git \
+    python3 \
+    python3-pip \
+    --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Ollama
 RUN curl -fsSL https://ollama.com/install.sh | sh
 
-# Create a directory for the model files
+# Set working directory
 WORKDIR /app
 
-# Copy setup script
-COPY setup.sh /app/setup.sh
-RUN chmod +x /app/setup.sh
+# print an environment variable MODEL_URL that i recieve from docker-compose.yml
+RUN echo $MODEL_URL
 
-# Set the default model name (can be overridden with --build-arg)
-ARG MODEL_NAME="XoXoHarsh/diet-assistant-llama3"
-ENV MODEL_NAME=$MODEL_NAME
 
-# Create a directory for our models
-RUN mkdir -p /app/models
-
-# Set up the entrypoint
-ENTRYPOINT ["/app/setup.sh"]
-
-# Expose the Ollama API port
-EXPOSE 11434

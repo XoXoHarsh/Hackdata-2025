@@ -1,74 +1,35 @@
+version: "3"
+
 services:
-  diet-assistant:
+  diet-ai:
     build:
       context: .
-      args:
-        MODEL_NAME: ${MODEL1_NAME:-XoXoHarsh/diet-assistant-tinyllama}
-    container_name: diet-assistant
+      dockerfile: Dockerfile
     ports:
-      - "11434:11434"
+      - "8004:11434"
     environment:
-      - MODEL_NAME=${MODEL1_NAME:-XoXoHarsh/diet-assistant-tinyllama}
-      - OLLAMA_MODEL_NAME=${MODEL1_LOCAL_NAME:-diet-assistant-tinyllama}
-      - MODEL_TYPE=${MODEL1_TYPE:-q4_k_m}
-    volumes:
-      - ollama-models-1:/root/.ollama
-      - ./models/model1:/app/models
+      - MODEL_URL=https://huggingface.co/XoXoHarsh/diet-assistant-llama3/resolve/main/unsloth.Q4_K_M.gguf?download=true
     restart: unless-stopped
+    container_name: diet-ai
 
-  stress-assistant:
-    build:
-      context: .
-      args:
-        MODEL_NAME: ${MODEL2_NAME:-XoXoHarsh/stress-assistant-tinyllama}
-    container_name: stress-assistant
-    ports:
-      - "11435:11434"
-    environment:
-      - MODEL_NAME=${MODEL2_NAME:-XoXoHarsh/stress-assistant-tinyllama}
-      - OLLAMA_MODEL_NAME=${MODEL2_LOCAL_NAME:-stress-assistant-tinyllama}
-      - MODEL_TYPE=${MODEL2_TYPE:-q4_k_m}
-    volumes:
-      - ollama-models-2:/root/.ollama
-      - ./models/model2:/app/models
-    restart: unless-stopped
-
-  exercise-assistant:
-    build:
-      context: .
-      args:
-        MODEL_NAME: ${MODEL3_NAME:-XoXoHarsh/exercise-assistant-tinyllama}
-    container_name: exercise-assistant
-    ports:
-      - "11436:11434"
-    environment:
-      - MODEL_NAME=${MODEL3_NAME:-XoXoHarsh/exercise-assistant-tinyllama}
-      - OLLAMA_MODEL_NAME=${MODEL3_LOCAL_NAME:-XoXoHarsh/exercise-assistant-tinyllama}
-      - MODEL_TYPE=${MODEL3_TYPE:-q4_k_m}
-    volumes:
-      - ollama-models-3:/root/.ollama
-      - ./models/model3:/app/models
-    restart: unless-stopped
-
-  # diet-assistant-4:
+  # stress-ai:
   #   build:
   #     context: .
-  #     args:
-  #       MODEL_NAME: ${MODEL4_NAME:-XoXoHarsh/diet-assistant-llama3}
-  #   container_name: diet-assistant-4
+  #     dockerfile: Dockerfile
   #   ports:
-  #     - "11437:11434"
+  #     - "8005:11434"
   #   environment:
-  #     - MODEL_NAME=${MODEL4_NAME:-XoXoHarsh/diet-assistant-llama3}
-  #     - OLLAMA_MODEL_NAME=${MODEL4_LOCAL_NAME:-diet-assistant-4}
-  #     - MODEL_TYPE=${MODEL4_TYPE:-q4_k_m}
-  #   volumes:
-  #     - ollama-models-4:/root/.ollama
-  #     - ./models/model4:/app/models
+  #     - MODEL_URL=https://huggingface.co/XoXoHarsh/stress-assistant-tinyllama/resolve/main/unsloth.Q4_K_M.gguf?download=true
   #   restart: unless-stopped
+  #   container_name: stress-ai
 
-volumes:
-  ollama-models-1:
-  ollama-models-2:
-  ollama-models-3:
-  ollama-models-4:
+  # exercise-ai:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "8006:11434"
+  #   environment:
+  #     - MODEL_URL=https://huggingface.co/XoXoHarsh/exercise-assistant-tinyllama/resolve/main/unsloth.Q4_K_M.gguf?download=true
+  #   restart: unless-stopped
+  #   container_name: exercise-ai

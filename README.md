@@ -14,7 +14,7 @@ Instead of relying on large, resource-intensive LLMs, it uses multiple small, fi
 
 The chatbot efficiently routes queries to the appropriate LLM using a classifier, making responses faster, accurate, and more affordable.  
 
-![diagram-export-3-9-2025-12_07_38-AM](https://github.com/user-attachments/assets/8aba931d-8cb8-4729-8662-46afe71a580d)
+![image](https://github.com/user-attachments/assets/a90a9159-f7cf-4985-b978-88742d512555)
 
 ### Key Features
 
@@ -75,10 +75,78 @@ Hackdata-2025
 │   │   ├── ...
 │   ├── package.json
 │   ├── ...
-├── Model_Containers/       # Scripts to run the models in containers
+├── Model_Containers/
+|   ├── docker-compose.yml
+|   ├── Dockerfile        # Scripts to run the models in containers
 └── README.md
+```
+
+## Hugging face
+``` sh
+https://huggingface.co/XoXoHarsh
 ```
 
 ## How to run
 
-Coming Soon
+``` sh
+git clone https://github.com/XoXoHarsh/Hackdata-2025.git
+```
+
+## Chat_Server
+
+```sh
+pip install -r requirements.txt
+pyhton app.py
+```
+### Traning Scripts
+```sh
+Datasets: The project includes four datasets—Classification_dataset.csv, diet_dataset.csv, excercise_dataset.csv, and stress_dataset.csv—used for training and classification.
+
+Notebooks: Finetuning.ipynb consolidates multiple scripts for fine-tuning, and classification.ipynb handles text classification.
+```
+
+## LIfeStyle_App
+``` sh
+npm i
+npx expo start
+```
+### env
+```sh
+EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=YOUR_CLERK_PUBLISHABLE_KEY
+EXPO_PUBLIC_API_URL=YOUR_PUBLIC_API__URL
+EXPO_PUBLIC_CHAT_SERVER=YOUR_PUBLIC_CHAT_SERVER_URL
+```
+
+## MIMIC SERVER
+
+## Prerequisites
+Make sure you have the following installed:
+- [Node.js](https://nodejs.org/) (Latest LTS version recommended)
+- [MongoDB](https://www.mongodb.com/) (Use MongoDB Atlas or local installation)
+
+``` sh
+cd Mimic_Server
+cd src
+nodemon index.js
+````
+## env
+``` sh
+PORT=8000
+MONGODB_URI= YOUR_MONGODB_URL
+ACCESS_TOKEN_SECRET=YOUR_ACCESS_TOKEN_SECRET
+ACCESS_TOKEN_EXPIRY=2d
+```
+## App Screenshots
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/afbc6bd7-1c88-4e90-bbe0-c80aa89747e1" width="45%" style="margin-right: 10px;">
+  <img src="https://github.com/user-attachments/assets/ec03388b-8c5d-4712-89eb-793466d337cb" width="45%">
+</p>
+
+
+
+
+
+
+
+
